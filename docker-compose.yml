@@ -50,7 +50,7 @@ services:
     init: true
     user: "${N8N_UID}:${N8N_GID}"
     ports:
-      - "${N8N_PORT}:5678"
+      - "${N8N_PORT}:${N8N_PORT}"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:5678/healthz"]
       interval: 15s
