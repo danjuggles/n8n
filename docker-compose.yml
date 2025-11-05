@@ -1,13 +1,24 @@
 services:
   ollama:
     image: ollama/ollama:${OLLAMA_TAG}
-    # container_name: ollama
+    restart: unless-stopped
     ports:
-      - "${OLLAMA_PORT}:11434"
-    networks:
-      - n8n-network
+      - "${OLLAMA_PORT}:${OLLAMA_PORT}"
+    networks: [n8n-network]
     volumes:
       - ollama_data:/root/.ollama
+
+  signer:
+    build:
+      context: ./playwright-service
+      dockerfile: Dockerfile
+    environment:
+      - TEST_MODE=${TEST_MODE}
+      # If you add auth later:
+      # - SERVICE_TOKEN=${PLAYWRIGHT_SERVICE_TOKEN}
+    shm_size: "1g"
+    expose: ["${SIGNER_PORT}"]            # internal-only; n8n can reach via service name
+    networks: [n8n-network]
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:11434/api/tags"]
@@ -17,16 +28,12 @@ services:
       start_period: 20s
     logging:
       driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      options: { max-size: "10m", max-file: "3" }
 
   n8n:
     image: n8nio/n8n:${N8N_TAG}
-    # container_name: n8n
     restart: unless-stopped
     environment:
-      - NODE_FUNCTION_ALLOW_EXTERNAL=*     # fine to keep; not required for HTTP approach
       - N8N_HOST=${N8N_HOST}
       - N8N_PORT=${N8N_PORT}
       - N8N_PROTOCOL=${N8N_PROTOCOL}
@@ -35,8 +42,8 @@ services:
       - HOME=/home/node
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
       - XDG_CACHE_HOME=/home/node/.n8n/.cache
-      # Expose the service token to workflows (HTTP Request node can read {{$env.SERVICE_TOKEN}})
-      - SERVICE_TOKEN=${PLAYWRIGHT_SERVICE_TOKEN}
+      # Optional if you want to pass a token into workflows:
+      # - SERVICE_TOKEN=${PLAYWRIGHT_SERVICE_TOKEN}
       # - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
       # - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
       # - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
@@ -45,14 +52,17 @@ services:
       - ${N8N_DATA}:/home/node/.n8n
       - ${N8N_FILES}:/files
       - ${N8N_CACHE}:/home/node/.cache
-      # Shared artifacts with Playwright (optional but handy)
       - shared:/shared
-    networks:
-      - n8n-network
-    init: true
+    networks: [n8n-network]
     user: "${N8N_UID}:${N8N_GID}"
+    init: true
     ports:
       - "${N8N_PORT}:${N8N_PORT}"
+    depends_on:
+      signer:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:5678/healthz"]
       interval: 15s
@@ -61,43 +71,7 @@ services:
       start_period: 30s
     logging:
       driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  # New: Playwright microservice
-  playwright:
-    # Official image with Chromium/Firefox/WebKit + deps preinstalled
-    # image: mcr.microsoft.com/playwright:v1.49.0-jammy
-    build: ./playwright-service
-    working_dir: /app
-    command: ["node", "dummy-script.js"]
-    # Mount your lightweight service code here (create the folder and files below)
-    volumes:
-      - ./playwright-service:/app
-      # Optional: share files (screenshots, PDFs) with n8n
-      - shared:/shared
-    environment:
-      - SERVICE_TOKEN=${PLAYWRIGHT_SERVICE_TOKEN}
-      # Increase stability for headless browsers
-    shm_size: "1gb"
-    expose:
-      - "3000"                # reachable as http://playwright:3000 from n8n
-    networks:
-      - n8n-network
-    restart: unless-stopped
-    healthcheck:
-      # simple TCP check on port 3000
-      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/3000'"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      options: { max-size: "10m", max-file: "3" }
 
 networks:
   n8n-network:
