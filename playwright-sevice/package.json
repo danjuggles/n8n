@@ -1,0 +1,11 @@
+{
+  "name": "playwright-service",
+  "private": true,
+  "type": "commonjs",
+  "scripts": { "start": "node dummy-script.js" },
+  "dependencies": {
+    "express": "^4.19.2",
+    "body-parser": "^1.20.3",
+    "playwright": "^1.49.0"
+  }
+}
