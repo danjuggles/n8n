@@ -1,7 +1,10 @@
-name: Redeploy Portainer (via Tailscale)
+name: Redeploy Portainer
 on:
   push:
-    branches: [ main ]   # change if needed
+    branches: [ main ]
+
+permissions:
+  contents: read
 
 jobs:
   redeploy:
@@ -9,20 +12,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Join your tailnet temporarily using an ephemeral auth key
       - name: Connect to Tailscale (ephemeral)
         uses: tailscale/github-action@v4
         with:
-          authkey: ${{ secrets.TS_AUTHKEY }}
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
 
-      - name: Trigger Portainer webhook (with API key)
+      - name: Redeploy via Portainer webhook (private over Tailscale)
         env:
-          PORTAINER_BASE: "http://100.71.26.31:9000"
-          # PORTAINER_BASE: "https://nas.your-tailnet.ts.net:9443"
-          WEBHOOK_PATH: "api/webhooks/c87dbb65-d991-4892-959b-91947dd1c4ef"
           PORTAINER_KEY: ${{ secrets.PORTAINER_API_KEY }}
+          PORTAINER_BASEURL: ${{ secrets.PORTAINER_BASEURL }}
+          PORTAINER_WEBHOOK_PATH: ${{ secrets.PORTAINER_WEBHOOK_PATH }}
         run: |
-          set -euo pipefail
           curl -fsSL -X POST \
             -H "X-API-Key: $PORTAINER_KEY" \
-            "$PORTAINER_BASE/$WEBHOOK_PATH"
+            "$PORTAINER_BASEURL/api/stacks/$PORTAINER_WEBHOOK_PATH"
