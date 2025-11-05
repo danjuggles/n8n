@@ -1,7 +1,7 @@
 services:
   ollama:
     image: ollama/ollama:${OLLAMA_TAG}
-    container_name: ollama
+    # container_name: ollama
     ports:
       - "${OLLAMA_PORT}:11434"
     networks:
@@ -24,7 +24,7 @@ services:
 
   n8n:
     image: n8nio/n8n:${N8N_TAG}
-    container_name: n8n
+    # container_name: n8n
     restart: unless-stopped
     environment:
       - NODE_FUNCTION_ALLOW_EXTERNAL=*
