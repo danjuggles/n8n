@@ -8,7 +8,6 @@ services:
     volumes:
       - ollama_data:/root/.ollama
     healthcheck:
-      # test: ["CMD-SHELL", "/bin/bash -lc 'exec 3<>/dev/tcp/127.0.0.1/11434'"]
       test: ["CMD", "sh", "-lc", "ollama list >/dev/null 2>&1"]
       interval: 15s
       timeout: 5s
@@ -24,10 +23,8 @@ services:
       dockerfile: Dockerfile
     environment:
       - TEST_MODE=${TEST_MODE}
-      # If you add auth later:
-      # - SERVICE_TOKEN=${PLAYWRIGHT_SERVICE_TOKEN}
     shm_size: "1g"
-    expose: ["3000"]            # internal-only; n8n can reach via service name
+    expose: ["3000"]
     networks: [n8n-network]
     restart: unless-stopped
     healthcheck:

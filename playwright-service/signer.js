@@ -21,7 +21,7 @@ async function signPetition({
 }) {
   const START_URL = normalizeStartUrl(petitionUrl);
 
-  // 👇 TEST MODE: short-circuit the real automation
+  // 👇 TEST MODE: short-circuit the real automation. Set in .env
   if (process.env.TEST_MODE === "true") {
     return {
       submitted: true,
