@@ -3,12 +3,12 @@ services:
     image: ollama/ollama:${OLLAMA_TAG}
     restart: unless-stopped
     ports:
-      - "${OLLAMA_PORT}:${OLLAMA_PORT}"
+      - "${OLLAMA_PORT:-11434}:11434"
     networks: [n8n-network]
     volumes:
       - ollama_data:/root/.ollama
     healthcheck:
-      test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/${OLLAMA_PORT}'"]
+      test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/11434'"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -26,11 +26,11 @@ services:
       # If you add auth later:
       # - SERVICE_TOKEN=${PLAYWRIGHT_SERVICE_TOKEN}
     shm_size: "1g"
-    expose: ["${SIGNER_PORT}"]            # internal-only; n8n can reach via service name
+    expose: ["3000"]            # internal-only; n8n can reach via service name
     networks: [n8n-network]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:${SIGNER_PORT}/healthz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/healthz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
       interval: 15s
       timeout: 5s
       retries: 5
