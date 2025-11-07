@@ -69,3 +69,4 @@ jobs:
             curl --fail-with-body -sS -X POST \
               -H "X-API-Key: $PORTAINER_KEY" \
               "$PORTAINER_WEBHOOK_PATH_MAIN"
+          fi
