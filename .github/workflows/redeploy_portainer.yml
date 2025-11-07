@@ -22,9 +22,8 @@ jobs:
       - name: Redeploy via Portainer webhook (private over Tailscale)
         env:
           PORTAINER_KEY: ${{ secrets.PORTAINER_API_KEY }}
-          PORTAINER_BASEURL: ${{ secrets.PORTAINER_BASEURL }}
-          PORTAINER_WEBHOOK_PATH: ${{ secrets.PORTAINER_WEBHOOK_PATH }}
+          PORTAINER_WEBHOOK_PATH: ${{ secrets.PORTAINER_WEBHOOK_PATH_MAIN }}
         run: |
           curl -fsSL -X POST \
             -H "X-API-Key: $PORTAINER_KEY" \
-            "$PORTAINER_BASEURL/api/stacks/$PORTAINER_WEBHOOK_PATH"
+            "$PORTAINER_WEBHOOK_PATH_MAIN"
