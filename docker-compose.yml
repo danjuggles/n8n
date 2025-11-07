@@ -18,11 +18,7 @@ services:
       options: { max-size: "10m", max-file: "3" }
 
   signer:
-    build:
-      context: ./playwright-service
-      dockerfile: Dockerfile
-    environment:
-      - TEST_MODE=${TEST_MODE}
+    image: ${SIGNER_IMAGE}:${SINGER_TAG}
     shm_size: "1g"
     expose: ["3000"]
     networks: [n8n-network]
