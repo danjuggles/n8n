@@ -18,7 +18,7 @@ services:
       options: { max-size: "10m", max-file: "3" }
 
   signer:
-    image: ${SIGNER_IMAGE}:${SINGER_TAG}
+    image: ${SIGNER_IMAGE}:${SIGNER_TAG}
     shm_size: "1g"
     expose: ["3000"]
     networks: [n8n-network]
