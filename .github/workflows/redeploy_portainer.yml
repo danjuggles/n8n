@@ -1,7 +1,8 @@
 name: Redeploy Portainer
+
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
 
 permissions:
   contents: read
@@ -22,8 +23,17 @@ jobs:
       - name: Redeploy via Portainer webhook (private over Tailscale)
         env:
           PORTAINER_KEY: ${{ secrets.PORTAINER_API_KEY }}
-          PORTAINER_WEBHOOK_PATH: ${{ secrets.PORTAINER_WEBHOOK_PATH_MAIN }}
+          PORTAINER_WEBHOOK_PATH_MAIN: ${{ secrets.PORTAINER_WEBHOOK_PATH_MAIN }}
+          PORTAINER_WEBHOOK_PATH_DEV: ${{ secrets.PORTAINER_WEBHOOK_PATH_DEV }}
         run: |
-          curl -fsSL -X POST \
-            -H "X-API-Key: $PORTAINER_KEY" \
-            "$PORTAINER_WEBHOOK_PATH_MAIN"
+          if [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
+            echo "Redeploying DEV environment..."
+            curl -fsSL -X POST \
+              -H "X-API-Key: $PORTAINER_KEY" \
+              "$PORTAINER_WEBHOOK_PATH_DEV"
+          else
+            echo "Redeploying MAIN environment..."
+            curl -fsSL -X POST \
+              -H "X-API-Key: $PORTAINER_KEY" \
+              "$PORTAINER_WEBHOOK_PATH_MAIN"
+          fi
