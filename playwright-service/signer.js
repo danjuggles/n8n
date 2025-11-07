@@ -18,11 +18,12 @@ async function signPetition({
   postcode = "",
   ukResident = true,
   notify = false,
+  testMode = false,
 }) {
   const START_URL = normalizeStartUrl(petitionUrl);
 
-  // 👇 TEST MODE: short-circuit the real automation. Set in .env
-  if (process.env.TEST_MODE === "true") {
+  // 👇 TEST MODE: short-circuit the real automation
+  if (testMode === true || String(testMode).toLowerCase() === "true") {
     return {
       submitted: true,
       testMode: true,
