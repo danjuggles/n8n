@@ -63,6 +63,7 @@ async function signPetition({
 
     return {
       submitted: success,
+      testMode: false,
       phaseSeen: {
         initialSubmit: true,
         emailConfirmPage: !!onConfirmEmailPage,

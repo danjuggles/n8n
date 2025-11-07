@@ -16,6 +16,7 @@ app.post("/sign", async (req, res) => {
       postcode = "",
       ukResident = true,
       notify = false,
+      testMode = false,
     } = req.body || {};
 
     if (!petitionUrl || !fullName || !email) {
@@ -33,6 +34,7 @@ app.post("/sign", async (req, res) => {
       postcode,
       ukResident,
       notify,
+      testMode,
     });
 
     // Always JSON

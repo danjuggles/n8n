@@ -1,8 +1,8 @@
-// sign.js — CLI wrapper: node sign.js "<url>" "Full Name" "email" "GB" "SW1A 0AA" true false
+// sign.js — CLI wrapper: node sign.js "<url>" "Full Name" "email" "GB" "SW1A 0AA" true false false
 const { signPetition } = require("./signer");
 
 (async () => {
-  const [, , petitionUrl, fullName, email, country = "GB", postcode = "", ukResident = "true", notify = "false"] =
+  const [, , petitionUrl, fullName, email, country = "GB", postcode = "", ukResident = "true", notify = "false", testMode = "false"] =
     process.argv;
 
   try {
@@ -14,6 +14,7 @@ const { signPetition } = require("./signer");
       postcode,
       ukResident,
       notify,
+      testMode,
     });
     // stdout must be pure JSON for n8n
     process.stdout.write(JSON.stringify(result));
